@@ -26,12 +26,18 @@ export function usePomodoro() {
         return () => clearInterval(interval);
     }, [isActive])
 
+    const formatTime = (seconds: number) => {
+        const minute = Math.floor(seconds / 60)
+        const second = seconds % 60
+        return `${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
+    }
+
     useEffect(() => {
         const label = mode === 'focus' ? 'Focus' :
                       mode === 'shortBreak' ? 'Short Break' :
                       'Long Break'
 
-        document.title = `[${timeLeft}] - ${label} | FocusNOW`;
+        document.title = `[${formatTime(timeLeft)}] - ${label} | FocusNOW`;
     }, [timeLeft, mode]);
 
     const switchMode = (newMode: timerMode) => {
@@ -52,5 +58,6 @@ export function usePomodoro() {
         setIsActive,
         switchMode,
         reset,
+        formatTime
     };
 }
