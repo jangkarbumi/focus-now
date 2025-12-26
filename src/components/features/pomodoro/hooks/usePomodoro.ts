@@ -33,12 +33,18 @@ export function usePomodoro() {
     }
 
     useEffect(() => {
-        const label = mode === 'focus' ? 'Focus' :
-                      mode === 'shortBreak' ? 'Short Break' :
-                      'Long Break'
+        if (isActive) {
+            const label = mode === 'focus' ? 'Focus' :
+                         mode === 'shortBreak' ? 'Short Break' :
+                        'Long Break'
 
-        document.title = `[${formatTime(timeLeft)}] - ${label} | FocusNOW`;
-    }, [timeLeft, mode]);
+            document.title = `[${formatTime(timeLeft)}] - ${label} | FocusNOW`;
+        }
+        else {
+            document.title = 'FocusNOW'
+        }
+
+    }, [timeLeft, mode, isActive]);
 
     const switchMode = (newMode: timerMode) => {
         setMode(newMode);
