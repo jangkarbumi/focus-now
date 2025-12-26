@@ -16,13 +16,8 @@ const {
   setIsActive,
   switchMode,
   reset,
+  formatTime
 } = usePomodoro()
-
-const formatTime = (seconds: number) => {
-    const minute = Math.floor(seconds / 60)
-    const second = seconds % 60
-    return `${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
-}
 
 return (
     <div className="flex justify-center items-center mt-20">
@@ -34,7 +29,7 @@ return (
                 key={m}
                 size='sm'
                 variant={mode === m ? 'default' : 'outline'}
-                onClick={() => switchMode}
+                onClick={() => switchMode(m)}
               >
                 {m === 'focus' ? "Focus" : m === 'shortBreak' ? 'Short Break' : 'Long Break'}
               </Button>
