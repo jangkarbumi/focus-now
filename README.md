@@ -4,21 +4,21 @@ FocusNOW adalah aplikasi berbasis **Next.js** yang dirancang untuk membantu prod
 
 ---
 
-## 🚀 Fitur Utama
+## Fitur Utama
 
-### ⏱️ Timer Fokus (Halaman Utama)
-- Timer untuk membantu teknik belajar seperti **Pomodoro**.
+### Timer Fokus (Halaman Utama)
+- Timer untuk membantu teknik belajar **Pomodoro**.
 - Membantu mempertahankan konsentrasi selama belajar.
 - UI sederhana dan mudah digunakan.
 
-### 📝 Manajemen Tugas
-- Pengguna dapat **menambah tugas** yang akan dikerjakan.
+### Manajemen Tugas
+- User dapat **menambah tugas** yang akan dikerjakan.
 - Setelah tugas selesai, tugas dapat **dihapus** dengan mudah.
 - Cocok untuk mencatat to-do list selama sesi belajar.
 
 ---
 
-## 📍 Getting Started
+## Getting Started
 
 Jalankan development server dengan perintah berikut:
 
