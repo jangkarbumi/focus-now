@@ -7,7 +7,6 @@ export default function NavBar() {
             <h1 className="text-2xl font-bold text-gray-700 pl-6">FocusNOW</h1>
 
             <div className="flex gap-5 pr-6">
-                <Button>Sign-In</Button>
                 <Sheet>
                     <SheetTrigger>
                         <Button>View Task</Button>
@@ -18,6 +17,8 @@ export default function NavBar() {
                         </SheetHeader>
                     </SheetContent>
                 </Sheet>
+
+                <Button>Sign-In</Button>
             </div>
         </nav>
     )
