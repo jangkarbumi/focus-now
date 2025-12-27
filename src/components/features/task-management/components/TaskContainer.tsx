@@ -35,6 +35,7 @@ export function TaskContainer() {
         <Input 
           value={input} 
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
           placeholder="Add new task..." 
         />
         <Button onClick={handleAdd} size="icon"><Plus className="h-4 w-4" /></Button>
