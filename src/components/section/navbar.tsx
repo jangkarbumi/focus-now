@@ -1,6 +1,8 @@
 import { Button } from "../ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 
+import { TaskContainer } from "../features/task-management/components/TaskContainer"
+
 export default function NavBar() {
     return (
         <nav className="bg-gray-200 h-16 w-full flex justify-between items-center">
@@ -15,6 +17,8 @@ export default function NavBar() {
                         <SheetHeader>
                             <SheetTitle>Your Active Task</SheetTitle>
                         </SheetHeader>
+
+                        <TaskContainer />
                     </SheetContent>
                 </Sheet>
 
