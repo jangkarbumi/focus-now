@@ -1,5 +1,6 @@
 "use client"
 
+import { formatShortDate } from "@/lib/utils"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -51,9 +52,12 @@ export function SortableTask({ task, onToggle, onDelete }: Props) {
           onCheckedChange={() => onToggle(task.id)} 
         />
         
-        <span className={`text-sm font-medium ${task.isCompleted ? "line-through text-gray-400" : ""}`}>
-          {task.title}
-        </span>
+        <div className="flex flex-col">
+            <span className={`text-sm font-medium ${task.isCompleted ? "line-through text-gray-400" : ""}`}>
+            {task.title}
+            </span>
+            <span className="text-[10px] text-gray-400x">{formatShortDate(task.dateCreated)}</span>
+        </div>
       </div>
 
       <Button variant="ghost" size="icon" onClick={() => onDelete(task.id)}>
