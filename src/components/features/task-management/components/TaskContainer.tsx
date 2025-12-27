@@ -1,76 +1,66 @@
 "use client"
-
 import { useState } from "react"
 import { useTask } from "../hooks/useTask"
-import { formatShortDate } from "@/lib/utils"
-
-import { Button } from "@/components/ui/button"
-import { Trash2, Plus } from "lucide-react"
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { SortableTask } from "./SortableTask"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 
 export function TaskContainer() {
-    const [input, setInput] = useState("")
-    const {
-        task,
-        addTask,
-        toggleTask,
-        deleteTask,
-        isLoaded,
-    } = useTask();
+  const [input, setInput] = useState("")
+  const { task, addTask, toggleTask, deleteTask, reorderTask, isLoaded } = useTask()
 
-    const handleAdd = () => {
-        if (!input.trim()) return;
-        addTask(input);
-        setInput("");
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  const handleAdd = () => {
+    if (!input.trim()) return
+    addTask(input)
+    setInput("")
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      reorderTask(active.id as string, over.id as string)
     }
+  }
 
-    if (!isLoaded) {
-        return <p className="text-center text-gray-400 mt-10">Loading....</p>
-    }
+  if (!isLoaded) return <p>Loading tasks...</p>
 
-    return (
-        <div className="flex flex-col gap-4 mt-6 h-full">
-            <div className="flex gap-2">
-                <Input
-                    placeholder="Is there anything to be done?"
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                />
+  return (
+    <div className="flex flex-col gap-4 mt-6">
+      <div className="flex gap-2 mb-4">
+        <Input 
+          value={input} 
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Add new task..." 
+        />
+        <Button onClick={handleAdd} size="icon"><Plus className="h-4 w-4" /></Button>
+      </div>
 
-                <Button size='icon' onClick={handleAdd}>
-                    <Plus className="h-4 2-4" />
-                </Button>
-            </div>
-
-            <ScrollArea className="h-[70vh] pr-4">
-                {task.length === 0 ? (
-                    <p className="text-center text-gray-400 mt-10">There is no task today!</p>
-                ) : (
-                    <div className="flex flex-col gap-3">
-                        {task.map(task => (
-                            <div key={task.id} className="flex items-center justify between p-3 gap-4 border rounded-lg bg-white shadow-sm">
-                                <div className="flex items-center gap-5">
-                                    <Checkbox
-                                        checked={task.isCompleted}
-                                        onCheckedChange={() => toggleTask(task.id)}
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className={task.isCompleted ? "line-through text-gray-400" : ""}>{task.title}</span>
-                                        <span className="text-[10px] text-gray-500">{formatShortDate(task.dateCreated)}</span>
-                                    </div>
-                                </div>
-
-                                <Button variant='ghost' size='icon' onClick={() => deleteTask(task.id)}>
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </ScrollArea>
-        </div>
-    )
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCenter} 
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext 
+          items={task.map(t => t.id)} 
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col">
+            {task.map((task) => (
+              <SortableTask 
+                key={task.id} 
+                task={task} 
+                onToggle={toggleTask} 
+                onDelete={deleteTask} 
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  )
 }
