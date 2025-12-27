@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Task } from "../types";
+import { arrayMove } from "@dnd-kit/sortable";
 
 //STORAGE KEY
 const storageKey = 'FOCUS_NOW_KEY';
@@ -49,5 +50,13 @@ export const useTask = () => {
         setTask(prev => prev.filter(t => t.id !== id))
     }
 
-    return { task, addTask, toggleTask, deleteTask, isLoaded }
+    const reorderTask = (activeID: string, overID:string) => {
+        setTask(items => {
+            const oldIndex = items.findIndex(t => t.id === activeID)
+            const newIndex = items.findIndex(t => t.id === overID)
+            return arrayMove(items, oldIndex, newIndex)
+        })
+    }
+
+    return { task, addTask, toggleTask, deleteTask, isLoaded, reorderTask }
 }
