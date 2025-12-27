@@ -17,12 +17,17 @@ export function TaskContainer() {
         addTask,
         toggleTask,
         deleteTask,
+        isLoaded,
     } = useTask();
 
     const handleAdd = () => {
         if (!input.trim()) return;
         addTask(input);
         setInput("");
+    }
+
+    if (!isLoaded) {
+        return <p className="text-center text-gray-400 mt-10">Loading....</p>
     }
 
     return (
