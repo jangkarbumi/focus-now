@@ -4,3 +4,11 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function formatShortDate(timestamp: number): string {
+  return new Intl.DateTimeFormat('en-EN', {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(new Date(timestamp))
+}
