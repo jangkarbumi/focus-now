@@ -51,14 +51,20 @@ export function TaskContainer() {
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col">
-            {task.map((task) => (
-              <SortableTask 
-                key={task.id} 
-                task={task} 
-                onToggle={toggleTask} 
-                onDelete={deleteTask} 
-              />
-            ))}
+            {task.length === 0 ?
+              <p className="text-center text-gray-400 text-[16px]">Yeay! There is no task left</p> :
+              <>
+                {task.map((task) => (
+                  <SortableTask 
+                    key={task.id} 
+                    task={task} 
+                    onToggle={toggleTask} 
+                    onDelete={deleteTask} 
+                  />
+                ))}
+              </> 
+            }
+
           </div>
         </SortableContext>
       </DndContext>
