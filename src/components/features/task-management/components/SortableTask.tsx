@@ -27,8 +27,6 @@ export function SortableTask({ task, onToggle, onDelete, isActive, onSelect }: P
     isDragging
   } = useSortable({ id: task.id })
 
-  const {toggleTask, deleteTask} = usePomodoroContext()
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
