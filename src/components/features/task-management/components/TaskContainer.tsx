@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { useTask } from "../hooks/useTask"
+import { usePomodoroContext } from "@/context/PomodoroContext"
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { SortableTask } from "./SortableTask"
@@ -10,7 +10,7 @@ import { Plus } from "lucide-react"
 
 export function TaskContainer() {
   const [input, setInput] = useState("")
-  const { task, addTask, toggleTask, deleteTask, reorderTask, isLoaded } = useTask()
+  const { task, addTask, toggleTask, deleteTask, reorderTask, activeTaskID, setActiveTaskID } = usePomodoroContext()
 
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -26,8 +26,6 @@ export function TaskContainer() {
       reorderTask(active.id as string, over.id as string)
     }
   }
-
-  if (!isLoaded) return <p>Loading tasks...</p>
 
   return (
     <div className="flex flex-col gap-4 mt-6">
@@ -60,6 +58,8 @@ export function TaskContainer() {
                     task={task} 
                     onToggle={toggleTask} 
                     onDelete={deleteTask} 
+                    isActive = {task.id === activeTaskID}
+                    onSelect = {() => setActiveTaskID(task.id)}
                   />
                 ))}
               </> 
