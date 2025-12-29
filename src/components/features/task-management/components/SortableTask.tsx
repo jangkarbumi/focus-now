@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { GripVertical, Trash2 } from "lucide-react"
 import { Task } from "../types"
-import { usePomodoroContext } from "@/context/PomodoroContext"
 
 interface Props {
     task: Task
