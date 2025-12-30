@@ -15,25 +15,28 @@ export function usePomodoro() {
     const [showComplete, setShowComplete] = useState(false);
 
     useEffect(() => {
-        if (!isActive) return;
+        let interval: NodeJS.Timeout | null = null;
 
-        const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    if (activeTask && mode === 'focus') {
-                        setShowComplete(true)
-                    }
+        if (isActive && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft(prev => prev - 1);
+            }, 1000)
+        }
 
-                    setIsActive(false);
-                    setTimeLeft(MODE_TIMES[mode])
+        if (timeLeft === 0) {
+            if (isActive) {
+                setIsActive(false);
+
+                if (mode === 'focus' && activeTask) {
+                    setShowComplete(true)
                 }
-
-                return prev - 1
-            });
-        }, 1000)
-
-        return () => clearInterval(interval);
-    }, [isActive, mode, activeTask])
+                setTimeLeft(MODE_TIMES[mode])
+            }
+        }
+        return () => {
+            if (interval) clearInterval(interval)
+        }
+    }, [isActive, mode, activeTask, timeLeft])
 
     const handleFinishedTask = () => {
         if (activeTask) {
