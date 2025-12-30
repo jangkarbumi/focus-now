@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { MODE_TIMES } from "../constant";
 import { timerMode } from "../types";
+import { usePomodoroContext } from "@/context/PomodoroContext";
 
 export function usePomodoro() {
+    const {activeTask, toggleTask, setActiveTaskID} = usePomodoroContext();
+
     const [mode, setMode] = useState<timerMode>('focus');
     const [isActive, setIsActive] = useState(false);
     const [timeLeft, setTimeLeft] = useState(MODE_TIMES.focus);
     const [progress, setProgress] = useState(0);
+    const [showComplete, setShowComplete] = useState(false);
 
     useEffect(() => {
         if (!isActive) return;
@@ -16,6 +20,10 @@ export function usePomodoro() {
         const interval = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
+                    if (activeTask && mode === 'focus') {
+                        setShowComplete(true)
+                    }
+
                     setIsActive(false);
                     setTimeLeft(MODE_TIMES[mode])
                 }
@@ -25,7 +33,15 @@ export function usePomodoro() {
         }, 1000)
 
         return () => clearInterval(interval);
-    }, [isActive, mode])
+    }, [isActive, mode, activeTask])
+
+    const handleFinishedTask = () => {
+        if (activeTask) {
+            toggleTask(activeTask.id)
+            setActiveTaskID(null);
+        }
+        setShowComplete(false);
+    }
 
     useEffect(() => {
         const totalTime = MODE_TIMES[mode]
@@ -74,6 +90,10 @@ export function usePomodoro() {
         switchMode,
         reset,
         formatTime,
-        progress
+        progress,
+        setTimeLeft,
+        handleFinishedTask,
+        showComplete,
+        setShowComplete
     };
 }

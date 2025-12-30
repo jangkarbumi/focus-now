@@ -9,11 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { usePomodoro } from "../hooks/usePomodoro";
 import { timerMode } from "../types";
 import { usePomodoroContext } from "@/context/PomodoroContext";
-import { useEffect, useState } from "react";
 
 export default function Timer() {
 
-const {activeTask, toggleTask, setActiveTaskID} = usePomodoroContext();
+const {activeTask} = usePomodoroContext();
 const {
   mode,
   timeLeft,
@@ -22,27 +21,31 @@ const {
   switchMode,
   reset,
   formatTime,
-  progress
+  progress,
+  handleFinishedTask,
+  setShowComplete,
+  showComplete
 } = usePomodoro()
 
-const [showComplete, setShowComplete] = useState(false);
+// const [showComplete, setShowComplete] = useState(false);
 
-useEffect(() => {
-  if (!isActive && mode === 'focus') {
-    if (activeTask) {
-      setIsActive(false)
-      setShowComplete(true)
-    }
-  }
-}, [timeLeft, mode, activeTask, setActiveTaskID])
+// useEffect(() => {
+//   if (timeLeft === 0 && mode === 'focus') {
+//     if (activeTask) {
+//       setIsActive(false)
+//       setShowComplete(true)
+//       setTimeLeft(MODE_TIMES[mode])
+//     }
+//   }
+// }, [timeLeft, mode, activeTask, setIsActive, setTimeLeft])
 
-const handleFinishedTask = () => {
-  if (activeTask) {
-    toggleTask(activeTask.id)
-    setActiveTaskID(null)
-  }
-  setShowComplete(false)
-}
+// const handleFinishedTask = () => {
+//   if (activeTask) {
+//     toggleTask(activeTask.id)
+//     setActiveTaskID(null)
+//   }
+//   setShowComplete(false)
+// }
 
 return (
   <>
