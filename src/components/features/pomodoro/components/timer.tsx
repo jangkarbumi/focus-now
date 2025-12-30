@@ -4,14 +4,16 @@ import { Card, CardHeader, CardTitle, CardFooter, CardContent } from "../../../u
 import { Button } from "../../../ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, RotateCcw } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { usePomodoro } from "../hooks/usePomodoro";
 import { timerMode } from "../types";
 import { usePomodoroContext } from "@/context/PomodoroContext";
+import { useEffect, useState } from "react";
 
 export default function Timer() {
 
-const { activeTask} = usePomodoroContext();
+const {activeTask, toggleTask, setActiveTaskID} = usePomodoroContext();
 const {
   mode,
   timeLeft,
@@ -23,10 +25,30 @@ const {
   progress
 } = usePomodoro()
 
+const [showComplete, setShowComplete] = useState(false);
+
+useEffect(() => {
+  if (!isActive && mode === 'focus') {
+    if (activeTask) {
+      setIsActive(false)
+      setShowComplete(true)
+    }
+  }
+}, [timeLeft, mode, activeTask, setActiveTaskID])
+
+const handleFinishedTask = () => {
+  if (activeTask) {
+    toggleTask(activeTask.id)
+    setActiveTaskID(null)
+  }
+  setShowComplete(false)
+}
+
 return (
+  <>
     <div className="flex justify-center items-center mt-20">
       
-      <div className="">
+      <div>
         <div className="text-center mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
           <span className="text-xs font-bold text-primary uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full">
             Current Focus
@@ -83,5 +105,31 @@ return (
         </Card>
       </div>
     </div>
+
+    <Dialog open={showComplete} onOpenChange={setShowComplete}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Focus Session Ended</DialogTitle>
+          <DialogDescription>Time for Break!</DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter>
+          <Button
+            variant='outline'
+            onClick={() => setShowComplete(false)}
+          >
+            Not Yet!
+          </Button>
+
+          <Button
+            variant='default'
+            onClick={handleFinishedTask}
+          >
+            Finished!
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </> 
   )
 }
