@@ -17,7 +17,7 @@ export function usePomodoro() {
             setTimeLeft(prev => {
                 if (prev <= 1) {
                     setIsActive(false);
-                    return 0;
+                    setTimeLeft(MODE_TIMES[mode])
                 }
 
                 return prev - 1
@@ -25,7 +25,7 @@ export function usePomodoro() {
         }, 1000)
 
         return () => clearInterval(interval);
-    }, [isActive])
+    }, [isActive, mode])
 
     useEffect(() => {
         const totalTime = MODE_TIMES[mode]
