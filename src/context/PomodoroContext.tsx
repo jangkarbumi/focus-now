@@ -12,7 +12,8 @@ interface pomodoroContextType {
     toggleTask: (id: string) => void,
     deleteTask: (id: string) => void,
     reorderTask: (activeID: string, overID: string) => void,
-    activeTask: Task | undefined
+    activeTask: Task | undefined,
+    unfocusTask: (id: string) => void
 }
 
 const PomodoroContext = createContext<pomodoroContextType | undefined>(undefined);
@@ -65,6 +66,10 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         })
     }
 
+    const unfocusTask = (id: string) => {
+        setActiveTaskID(null);
+    }
+
     return (
         <PomodoroContext.Provider value={{
             task,
@@ -74,7 +79,8 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             toggleTask,
             deleteTask,
             reorderTask,
-            activeTask
+            activeTask,
+            unfocusTask
         }}>
             {children}
         </PomodoroContext.Provider>
