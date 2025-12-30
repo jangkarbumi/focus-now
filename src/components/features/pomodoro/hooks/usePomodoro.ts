@@ -8,6 +8,7 @@ export function usePomodoro() {
     const [mode, setMode] = useState<timerMode>('focus');
     const [isActive, setIsActive] = useState(false);
     const [timeLeft, setTimeLeft] = useState(MODE_TIMES.focus);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         if (!isActive) return;
@@ -25,6 +26,14 @@ export function usePomodoro() {
 
         return () => clearInterval(interval);
     }, [isActive])
+
+    useEffect(() => {
+        const totalTime = MODE_TIMES[mode]
+        const elapsedTime = totalTime - timeLeft
+        const newProgress = (elapsedTime / totalTime) * 100
+
+        setProgress(newProgress)
+    }, [timeLeft, mode])
 
     const formatTime = (seconds: number) => {
         const minute = Math.floor(seconds / 60)
@@ -64,6 +73,7 @@ export function usePomodoro() {
         setIsActive,
         switchMode,
         reset,
-        formatTime
+        formatTime,
+        progress
     };
 }
