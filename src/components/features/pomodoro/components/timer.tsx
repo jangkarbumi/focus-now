@@ -1,7 +1,8 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardFooter } from "../../../ui/card";
+import { Card, CardHeader, CardTitle, CardFooter, CardContent } from "../../../ui/card";
 import { Button } from "../../../ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Play, Pause, RotateCcw } from "lucide-react"
 
 import { usePomodoro } from "../hooks/usePomodoro";
@@ -18,7 +19,8 @@ const {
   setIsActive,
   switchMode,
   reset,
-  formatTime
+  formatTime,
+  progress
 } = usePomodoro()
 
 return (
@@ -56,6 +58,13 @@ return (
               {formatTime(timeLeft)}
             </CardTitle>
           </CardHeader>
+
+          <CardContent>
+            <Progress
+             value={progress}
+             className="transition-all duration-1000 ease-linear" 
+            />
+          </CardContent>
           
           <CardFooter className="flex justify-center gap-4 pb-8">
             <Button 
