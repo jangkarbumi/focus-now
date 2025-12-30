@@ -59,7 +59,7 @@ export function TaskContainer() {
                     onToggle={toggleTask} 
                     onDelete={deleteTask} 
                     isActive = {task.id === activeTaskID}
-                    onSelect = {() => setActiveTaskID(task.id)}
+                    onSelect = {() => activeTaskID === task.id ? setActiveTaskID(null) : setActiveTaskID(task.id)}
                   />
                 ))}
               </> 
