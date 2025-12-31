@@ -28,7 +28,7 @@ export default function NavBar() {
                     <PopoverTrigger>
                         <Button>
                             <UserRound/>
-                            <span>jangkarbumi</span>
+                            <span>User</span>
                         </Button>
                     </PopoverTrigger>
 
