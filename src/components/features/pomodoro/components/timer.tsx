@@ -28,26 +28,6 @@ const {
   showComplete
 } = usePomodoro()
 
-// const [showComplete, setShowComplete] = useState(false);
-
-// useEffect(() => {
-//   if (timeLeft === 0 && mode === 'focus') {
-//     if (activeTask) {
-//       setIsActive(false)
-//       setShowComplete(true)
-//       setTimeLeft(MODE_TIMES[mode])
-//     }
-//   }
-// }, [timeLeft, mode, activeTask, setIsActive, setTimeLeft])
-
-// const handleFinishedTask = () => {
-//   if (activeTask) {
-//     toggleTask(activeTask.id)
-//     setActiveTaskID(null)
-//   }
-//   setShowComplete(false)
-// }
-
 return (
   <>
     <div className="flex justify-center items-center mt-20">
@@ -80,11 +60,14 @@ return (
               ))}
 
             </div>
-            <CardTitle className="text-8xl font-bold tracking-tighter text-gray-800">
-              {formatTime(timeLeft)}
-            </CardTitle>
 
-            <TimeSetting /> 
+            <div>
+              <CardTitle className="text-8xl font-bold tracking-tighter text-gray-800">
+                {formatTime(timeLeft)}
+              </CardTitle>
+
+              <TimeSetting /> 
+            </div>
           </CardHeader>
 
           <CardContent>

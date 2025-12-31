@@ -46,7 +46,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
     //STATE TIMER
     const [mode, setMode] = useState<timerMode>('focus')
-    const [timeLeft, setTimeLeft] = useState(25 * 60)
+    const [timeLeft, setTimeLeft] = useState(MODE_TIMES.focus)
     const [isActive, setIsActive] = useState(false)
 
     useEffect(() => {
@@ -57,16 +57,15 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             const {task: savedTask, activeTaskID: savedActiveID} = parsed;
             setTask(savedTask || []);
             setActiveTaskID(savedActiveID || null);
-            setDuration(parsed.duration || {focus: 25, shortBreak: 5, longBreak: 10})
         }
         setIsLoaded(true);
     }, [])
 
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID, duration}));
+            localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID}));
         };
-    }, [task, activeTaskID, isLoaded, duration])
+    }, [task, activeTaskID, isLoaded])
 
     const updateDuration = (newDuration: CustomTimeDuration) => {
         setDuration(newDuration);
@@ -90,10 +89,13 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     const activeTask = task.find(t => t.id === activeTaskID);
 
     const playAlarm = () => {
-        const audio = new Audio("/sounds/alarm.mp3");
-        audio.play();
+        const audio = new Audio("/sound/alarm.mp3");
+        audio.volume = 1;
+        
+        audio.play().catch((err) => {
+            console.error("Audio playback failed:", err.message);
+        });
 
-        // Getarkan HP selama 500ms (jika didukung perangkat)
         if ("vibrate" in navigator) {
             navigator.vibrate(500);
         }
