@@ -48,7 +48,6 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     const [mode, setMode] = useState<timerMode>('focus')
     const [timeLeft, setTimeLeft] = useState(25 * 60)
     const [isActive, setIsActive] = useState(false)
-    const [hasMounted, setHasMounted] = useState(false)
 
     useEffect(() => {
         const savedData = localStorage.getItem('FOCUS_NOW_KEY');
@@ -65,10 +64,10 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     }, [])
 
     useEffect(() => {
-        if (isLoaded && hasMounted) {
+        if (isLoaded) {
             localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID, duration}));
         };
-    }, [task, activeTaskID, isLoaded, duration, hasMounted])
+    }, [task, activeTaskID, isLoaded, duration])
 
     const updateDuration = (newDuration: CustomTimeDuration) => {
         setDuration(newDuration);
@@ -91,12 +90,6 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
     const activeTask = task.find(t => t.id === activeTaskID);
 
-    const playAlarm = () => {
-        const audio = new Audio("/sound/alarm.mp3");
-        audio.volume = 0.5;
-        audio.play().catch((err) => console.log("Audio play blocked:", err));
-    };
-
     //USE EFFECT TIMER
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -105,12 +98,12 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         interval = setInterval(() => {
             setTimeLeft((prev) =>  {
                 if (prev <= 1) {
-                    playAlarm()
+                    playAlarm();
                     setIsActive(false);
                     return duration[mode] * 60
                 }
 
-                return prev - 1
+                return prev -1
             })
         }, 1000);
         }
@@ -133,7 +126,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         })
     }
 
-    const unfocusTask = () => {
+    const unfocusTask = (id: string) => {
         setActiveTaskID(null);
     }
 
@@ -157,7 +150,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             isActive,
             setIsActive
         }}>
-            {!hasMounted ? null : children}
+            {children}
         </PomodoroContext.Provider>
     )
 }
