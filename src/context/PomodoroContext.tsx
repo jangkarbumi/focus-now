@@ -49,6 +49,9 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     const [timeLeft, setTimeLeft] = useState(25 * 60)
     const [isActive, setIsActive] = useState(false)
 
+    //MOUNTED
+    const [hasMounted, setHasMounted] = useState(false);
+
     useEffect(() => {
         const savedData = localStorage.getItem('FOCUS_NOW_KEY');
 
@@ -58,16 +61,17 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             setTask(savedTask || []);
             setActiveTaskID(savedActiveID || null);
             setDuration(parsed.duration || {focus: 25, shortBreak: 5, longBreak: 10})
+            setTimeLeft(duration.focus * 60)
         }
         setIsLoaded(true);
         setHasMounted(true);
-    }, [])
+    }, [duration])
 
     useEffect(() => {
-        if (isLoaded) {
+        if (isLoaded && hasMounted) {
             localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID, duration}));
         };
-    }, [task, activeTaskID, isLoaded, duration])
+    }, [task, activeTaskID, isLoaded, duration, hasMounted])
 
     const updateDuration = (newDuration: CustomTimeDuration) => {
         setDuration(newDuration);
@@ -90,6 +94,13 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
     const activeTask = task.find(t => t.id === activeTaskID);
 
+    //ALARM PLAY
+    const playAlarm = () => {
+        const audio = new Audio("/sound/alarm.mp3")
+        audio.volume = 1;
+        audio.play().catch(err => console.log('cannot play audio: ', err));
+    }
+
     //USE EFFECT TIMER
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -109,12 +120,13 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         }
 
         if (timeLeft === 0 && isActive) {
-        setIsActive(false);
-        setTimeLeft(duration[mode] * 60); 
+            playAlarm();
+            setIsActive(false);
+            setTimeLeft(duration[mode] * 60); 
         }
 
         return () => {
-        if (interval) clearInterval(interval);
+            if (interval) clearInterval(interval);
         };
     }, [isActive, timeLeft, duration, mode]);
 
@@ -150,7 +162,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             isActive,
             setIsActive
         }}>
-            {children}
+            {!hasMounted ? null : children}
         </PomodoroContext.Provider>
     )
 }
