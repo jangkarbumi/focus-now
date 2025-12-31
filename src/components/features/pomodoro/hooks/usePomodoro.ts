@@ -32,16 +32,16 @@ export function usePomodoro() {
     return `${m}:${s}`;
   };
 
-  const switchMode = (newMode: timerMode) => {
-    setMode(newMode);
-    setTimeLeft(duration[newMode] * 60);
-    setIsActive(false);
-  };
-
-  const reset = () => {
-    setIsActive(false);
-    setTimeLeft(duration[mode] * 60);
-  };
+    const switchMode = (newMode: timerMode) => {
+        setMode(newMode);
+        setTimeLeft(duration[newMode]);
+        setIsActive(false);
+    }
+    
+    const reset = () => {
+        setIsActive(false);
+        setTimeLeft(duration[mode] * 60);
+    }
 
   const handleSaveNewDuration = () => {
     updateDuration(tempDuration);
