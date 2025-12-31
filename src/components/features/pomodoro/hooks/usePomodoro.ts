@@ -1,42 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MODE_TIMES } from "../constant";
 import { timerMode } from "../types";
 import { usePomodoroContext } from "@/context/PomodoroContext";
 
 export function usePomodoro() {
-    const {activeTask, toggleTask, setActiveTaskID} = usePomodoroContext();
+    const {activeTask, toggleTask, setActiveTaskID, duration, updateDuration,
+           mode, setMode, timeLeft, setTimeLeft, isActive, setIsActive
+    } = usePomodoroContext();
 
-    const [mode, setMode] = useState<timerMode>('focus');
-    const [isActive, setIsActive] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(MODE_TIMES.focus);
     const [progress, setProgress] = useState(0);
     const [showComplete, setShowComplete] = useState(false);
+    const [tempDuration, setTempDuration] = useState(duration);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
-
-        if (isActive && timeLeft > 0) {
-            interval = setInterval(() => {
-                setTimeLeft(prev => prev - 1);
-            }, 1000)
-        }
-
-        if (timeLeft === 0) {
-            if (isActive) {
-                setIsActive(false);
-
-                if (mode === 'focus' && activeTask) {
-                    setShowComplete(true)
-                }
-                setTimeLeft(MODE_TIMES[mode])
-            }
-        }
-        return () => {
-            if (interval) clearInterval(interval)
-        }
-    }, [isActive, mode, activeTask, timeLeft])
+        setTempDuration(duration)
+    }, [duration])
 
     const handleFinishedTask = () => {
         if (activeTask) {
@@ -47,12 +27,18 @@ export function usePomodoro() {
     }
 
     useEffect(() => {
-        const totalTime = MODE_TIMES[mode]
+        const totalTime = duration[mode] * 60
         const elapsedTime = totalTime - timeLeft
         const newProgress = (elapsedTime / totalTime) * 100
 
         setProgress(newProgress)
-    }, [timeLeft, mode])
+    }, [timeLeft, mode, duration])
+
+    useEffect(() => {
+        if (timeLeft === 0 && mode === 'focus' && activeTask) {
+        setShowComplete(true);
+        }
+    }, [timeLeft, mode, activeTask]);
 
     const formatTime = (seconds: number) => {
         const minute = Math.floor(seconds / 60)
@@ -76,14 +62,27 @@ export function usePomodoro() {
 
     const switchMode = (newMode: timerMode) => {
         setMode(newMode);
-        setTimeLeft(MODE_TIMES[newMode]);
+        setTimeLeft(duration[newMode]);
         setIsActive(false);
     }
     
     const reset = () => {
         setIsActive(false);
-        setTimeLeft(MODE_TIMES[mode]);
+        setTimeLeft(duration[mode]);
     }
+
+    const handleSaveNewDuration = () => {
+        updateDuration(tempDuration);
+        setIsOpen(false);
+    }
+
+    useEffect(() => {
+        const newTime = mode === 'focus' ? duration.focus :
+                        mode === 'shortBreak' ? duration.shortBreak :
+                        duration.longBreak
+        
+        setTimeLeft(newTime * 60)
+    }, [duration, mode, setTimeLeft])
 
     return {
         mode,
@@ -97,6 +96,11 @@ export function usePomodoro() {
         setTimeLeft,
         handleFinishedTask,
         showComplete,
-        setShowComplete
+        setShowComplete,
+        handleSaveNewDuration,
+        tempDuration,
+        setTempDuration,
+        isOpen,
+        setIsOpen
     };
 }
