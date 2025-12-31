@@ -12,7 +12,7 @@ export default function NavBar() {
 
             <div className="flex gap-5 pr-6">
                 <Sheet>
-                    <SheetTrigger>
+                    <SheetTrigger asChild>
                         <Button>View Task</Button>
                     </SheetTrigger>
                     <SheetContent>
