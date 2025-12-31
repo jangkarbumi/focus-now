@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { usePomodoro } from "../hooks/usePomodoro";
 import { timerMode } from "../types";
 import { usePomodoroContext } from "@/context/PomodoroContext";
+import { TimeSetting } from "./TimeSetting";
 
 export default function Timer() {
 
@@ -82,6 +83,8 @@ return (
             <CardTitle className="text-8xl font-bold tracking-tighter text-gray-800">
               {formatTime(timeLeft)}
             </CardTitle>
+
+            <TimeSetting /> 
           </CardHeader>
 
           <CardContent>
