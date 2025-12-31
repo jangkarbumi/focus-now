@@ -16,6 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "FocusNOW",
+  icons: {
+      icon: '/favicon.ico',
+      shortcut: '/favicon.ico'
+  },
   description: "Let's focus on our task!",
 };
 
