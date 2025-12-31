@@ -68,7 +68,7 @@ export function usePomodoro() {
     
     const reset = () => {
         setIsActive(false);
-        setTimeLeft(duration[mode]);
+        setTimeLeft(duration[mode] * 60);
     }
 
     const handleSaveNewDuration = () => {
