@@ -1,106 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { timerMode } from "../types";
 import { usePomodoroContext } from "@/context/PomodoroContext";
 
 export function usePomodoro() {
-    const {activeTask, toggleTask, setActiveTaskID, duration, updateDuration,
-           mode, setMode, timeLeft, setTimeLeft, isActive, setIsActive
+    const {
+        activeTask, toggleTask, setActiveTaskID, duration, updateDuration,
+        mode, setMode, timeLeft, setTimeLeft, isActive, setIsActive, progress
     } = usePomodoroContext();
 
-    const [progress, setProgress] = useState(0);
     const [showComplete, setShowComplete] = useState(false);
     const [tempDuration, setTempDuration] = useState(duration);
     const [isOpen, setIsOpen] = useState(false);
 
+    // Sync tempDuration saat durasi di context berubah (misal saat load storage)
     useEffect(() => {
-        setTempDuration(duration)
-    }, [duration])
+        setTempDuration(duration);
+    }, [duration]);
 
-    const handleFinishedTask = () => {
-        if (activeTask) {
-            toggleTask(activeTask.id)
-            setActiveTaskID(null);
-        }
-        setShowComplete(false);
-    }
-
-    useEffect(() => {
-        const totalTime = duration[mode] * 60
-        const elapsedTime = totalTime - timeLeft
-        const newProgress = (elapsedTime / totalTime) * 100
-
-        setProgress(newProgress)
-    }, [timeLeft, mode, duration])
-
+    // Deteksi task selesai
     useEffect(() => {
         if (timeLeft === 0 && mode === 'focus' && activeTask) {
-        setShowComplete(true);
+            setShowComplete(true);
         }
     }, [timeLeft, mode, activeTask]);
 
+    const handleFinishedTask = () => {
+        if (activeTask) {
+            toggleTask(activeTask.id);
+            setActiveTaskID(null);
+        }
+        setShowComplete(false);
+    };
+
     const formatTime = (seconds: number) => {
-        const minute = Math.floor(seconds / 60)
-        const second = seconds % 60
-        return `${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
-    }
-
-    useEffect(() => {
-        if (isActive) {
-            const label = mode === 'focus' ? 'Focus' :
-                         mode === 'shortBreak' ? 'Short Break' :
-                        'Long Break'
-
-            document.title = `[${formatTime(timeLeft)}] - ${label} | FocusNOW`;
-        }
-        else {
-            document.title = 'FocusNOW'
-        }
-
-    }, [timeLeft, mode, isActive]);
+        const minute = Math.floor(seconds / 60);
+        const second = seconds % 60;
+        return `${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+    };
 
     const switchMode = (newMode: timerMode) => {
         setMode(newMode);
-        setTimeLeft(duration[newMode]);
+        setTimeLeft(duration[newMode] * 60); // Pastikan dikali 60
         setIsActive(false);
-    }
+    };
     
     const reset = () => {
         setIsActive(false);
         setTimeLeft(duration[mode] * 60);
-    }
+    };
 
     const handleSaveNewDuration = () => {
         updateDuration(tempDuration);
         setIsOpen(false);
-    }
-
-    useEffect(() => {
-        const newTime = mode === 'focus' ? duration.focus :
-                        mode === 'shortBreak' ? duration.shortBreak :
-                        duration.longBreak
-        
-        setTimeLeft(newTime * 60)
-    }, [duration, mode, setTimeLeft])
+    };
 
     return {
-        mode,
-        timeLeft,
-        isActive,
-        setIsActive,
-        switchMode,
-        reset,
-        formatTime,
-        progress,
-        setTimeLeft,
-        handleFinishedTask,
-        showComplete,
-        setShowComplete,
-        handleSaveNewDuration,
-        tempDuration,
-        setTempDuration,
-        isOpen,
-        setIsOpen
+        mode, timeLeft, isActive, setIsActive, switchMode, reset,
+        formatTime, progress, setTimeLeft, handleFinishedTask,
+        showComplete, setShowComplete, handleSaveNewDuration,
+        tempDuration, setTempDuration, isOpen, setIsOpen
     };
 }
