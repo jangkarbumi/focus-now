@@ -3,6 +3,8 @@
 import React, {createContext, useContext, useState, useEffect} from "react";
 import { Task } from "@/components/features/task-management/types";
 import { arrayMove } from "@dnd-kit/sortable";
+import { timerMode } from "@/components/features/pomodoro/types";
+import { MODE_TIMES } from "@/components/features/pomodoro/constant";
 
 interface pomodoroContextType {
     task: Task[],
@@ -14,6 +16,20 @@ interface pomodoroContextType {
     reorderTask: (activeID: string, overID: string) => void,
     activeTask: Task | undefined,
     unfocusTask: (id: string) => void
+    duration: CustomTimeDuration,
+    updateDuration: (newDuration: CustomTimeDuration) => void
+    mode: timerMode,
+    setMode: (mode: timerMode) => void,
+    timeLeft: number,
+    setTimeLeft: React.Dispatch<React.SetStateAction<number>>,
+    isActive: boolean,
+    setIsActive: (active: boolean) => void
+}
+
+export interface CustomTimeDuration {
+    focus: number,
+    shortBreak: number,
+    longBreak: number
 }
 
 const PomodoroContext = createContext<pomodoroContextType | undefined>(undefined);
@@ -22,24 +38,39 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     const [task, setTask] = useState<Task[]>([]);
     const [activeTaskID, setActiveTaskID] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [duration, setDuration] = useState<CustomTimeDuration>({
+        focus: MODE_TIMES.focus,
+        shortBreak: MODE_TIMES.shortBreak,
+        longBreak: MODE_TIMES.longBreak,
+    })
 
+    //STATE TIMER
+    const [mode, setMode] = useState<timerMode>('focus')
+    const [timeLeft, setTimeLeft] = useState(25 * 60)
+    const [isActive, setIsActive] = useState(false)
 
     useEffect(() => {
         const savedData = localStorage.getItem('FOCUS_NOW_KEY');
 
         if (savedData) {
-            const {task: savedTask, activeTaskID: savedActiveID} = JSON.parse(savedData);
+            const parsed = JSON.parse(savedData);
+            const {task: savedTask, activeTaskID: savedActiveID} = parsed;
             setTask(savedTask || []);
             setActiveTaskID(savedActiveID || null);
+            setDuration(parsed.duration || {focus: 25, shortBreak: 5, longBreak: 10})
         }
         setIsLoaded(true);
     }, [])
 
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID}));
+            localStorage.setItem('FOCUS_NOW_KEY', JSON.stringify({task, activeTaskID, duration}));
         };
-    }, [task, activeTaskID, isLoaded])
+    }, [task, activeTaskID, isLoaded, duration])
+
+    const updateDuration = (newDuration: CustomTimeDuration) => {
+        setDuration(newDuration);
+    }
 
 
     const toggleTask = (id: string) => {
@@ -57,6 +88,26 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
     }
 
     const activeTask = task.find(t => t.id === activeTaskID);
+
+    //USE EFFECT TIMER
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+
+        if (isActive && timeLeft > 0) {
+        interval = setInterval(() => {
+            setTimeLeft((prev) => prev - 1);
+        }, 1000);
+        }
+
+        if (timeLeft === 0 && isActive) {
+        setIsActive(false);
+        setTimeLeft(duration[mode] * 60); 
+        }
+
+        return () => {
+        if (interval) clearInterval(interval);
+        };
+    }, [isActive, timeLeft, duration, mode]);
 
     const reorderTask = (activeID: string, overID: string) => {
         setTask(items => {
@@ -80,7 +131,15 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
             deleteTask,
             reorderTask,
             activeTask,
-            unfocusTask
+            unfocusTask,
+            updateDuration,
+            duration,
+            mode,
+            setMode,
+            timeLeft,
+            setTimeLeft,
+            isActive,
+            setIsActive
         }}>
             {children}
         </PomodoroContext.Provider>
