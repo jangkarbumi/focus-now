@@ -57,15 +57,11 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
         if (savedData) {
             const parsed = JSON.parse(savedData);
-            const {task: savedTask, activeTaskID: savedActiveID, duration: savedDuration} = parsed;
-
+            const {task: savedTask, activeTaskID: savedActiveID} = parsed;
             setTask(savedTask || []);
             setActiveTaskID(savedActiveID || null);
-
-            const finalDuration = savedDuration || {focus: 25, shortBreak: 5, longBreak: 10};
-            setDuration(finalDuration)
-
-            setTimeLeft(finalDuration.focus * 60)
+            setDuration(parsed.duration || {focus: 25, shortBreak: 5, longBreak: 10})
+            setTimeLeft(duration.focus * 60)
         }
         setIsLoaded(true);
         setHasMounted(true);
@@ -111,16 +107,14 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
         if (isActive && timeLeft > 0) {
         interval = setInterval(() => {
-            setTimeLeft((prev) =>  {
-                if (prev <= 1) {
-                    playAlarm();
-                    setIsActive(false);
-                    return duration[mode] * 60
-                }
-
-                return prev -1
-            })
+            setTimeLeft((prev) => prev - 1);
         }, 1000);
+        }
+
+        if (timeLeft === 0 && isActive) {
+            playAlarm();
+            setIsActive(false);
+            setTimeLeft(duration[mode] * 60); 
         }
 
         return () => {
@@ -136,7 +130,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         })
     }
 
-    const unfocusTask = () => {
+    const unfocusTask = (id: string) => {
         setActiveTaskID(null);
     }
 
