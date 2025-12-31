@@ -6,12 +6,6 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { timerMode } from "@/components/features/pomodoro/types";
 import { MODE_TIMES } from "@/components/features/pomodoro/constant";
 
-export interface CustomTimeDuration {
-  focus: number;
-  shortBreak: number;
-  longBreak: number;
-}
-
 interface PomodoroContextType {
   task: Task[];
   activeTaskID: string | null;
@@ -30,61 +24,53 @@ interface PomodoroContextType {
   isActive: boolean;
   setIsActive: (active: boolean) => void;
   progress: number;
-  unfocusTask: () => void;
+}
+
+export interface CustomTimeDuration {
+    focus: number,
+    shortBreak: number,
+    longBreak: number
 }
 
 const PomodoroContext = createContext<PomodoroContextType | undefined>(undefined);
 
 export function PomodoroProvider({ children }: { children: React.ReactNode }) {
-  // --- STATE ---
-  const [isLoaded, setIsLoaded] = useState(false);
   const [task, setTask] = useState<Task[]>([]);
   const [activeTaskID, setActiveTaskID] = useState<string | null>(null);
+  const [duration, setDuration] = useState<CustomTimeDuration>({
+    focus: MODE_TIMES.focus,
+    shortBreak: MODE_TIMES.shortBreak,
+    longBreak: MODE_TIMES.longBreak,
+  });
   const [mode, setMode] = useState<timerMode>("focus");
+  const [timeLeft, setTimeLeft] = useState(MODE_TIMES.focus * 60);
   const [isActive, setIsActive] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Lazy Init Duration: Langsung ambil dari LocalStorage agar tidak kena 1500/300/600
-  const [duration, setDuration] = useState<CustomTimeDuration>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("FOCUS_NOW_KEY");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.duration) return parsed.duration;
-      }
-    }
-    return { focus: MODE_TIMES.focus, shortBreak: MODE_TIMES.shortBreak, longBreak: MODE_TIMES.longBreak };
-  });
-
-  // Lazy Init TimeLeft
-  const [timeLeft, setTimeLeft] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("FOCUS_NOW_KEY");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.duration) return parsed.duration.focus * 60;
-      }
-    }
-    return MODE_TIMES.focus * 60;
-  });
-
-  // --- PERSISTENCE ---
+  // 1. LOAD DATA (Hanya sekali saat mount)
   useEffect(() => {
     const savedData = localStorage.getItem("FOCUS_NOW_KEY");
     if (savedData) {
       const parsed = JSON.parse(savedData);
       setTask(parsed.task || []);
       setActiveTaskID(parsed.activeTaskID || null);
+      if (parsed.duration) {
+        setDuration(parsed.duration);
+        // Set waktu awal berdasarkan durasi yang disimpan & mode saat ini
+        setTimeLeft(parsed.duration[mode] * 60);
+      }
     }
     setIsLoaded(true);
   }, []);
 
+  // 2. SAVE DATA
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem("FOCUS_NOW_KEY", JSON.stringify({ task, activeTaskID, duration }));
     }
   }, [task, activeTaskID, duration, isLoaded]);
 
-  // --- TIMER LOGIC ---
+  // 3. TIMER LOGIC
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
@@ -92,16 +78,19 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0 && isActive) {
-      const audio = new Audio("/sound/alarm.mp3");
-      audio.play().catch(() => {});
+    } else if (timeLeft === 0) {
+      playAlarm();
       setIsActive(false);
+      // Reset ke durasi awal mode saat ini setelah alarm
+      setTimeLeft(duration[mode] * 60);
     }
 
-    return () => { if (interval) clearInterval(interval); };
-  }, [isActive, timeLeft]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, timeLeft, mode, duration]);
 
-  // --- DERIVED STATE (Progress & Title) ---
+  // 4. DOCUMENT TITLE & PROGRESS (Derived State)
   const progress = useMemo(() => {
     const totalSeconds = duration[mode] * 60;
     return ((totalSeconds - timeLeft) / totalSeconds) * 100;
@@ -109,50 +98,62 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isActive) {
-      const min = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-      const sec = (timeLeft % 60).toString().padStart(2, "0");
-      document.title = `[${min}:${sec}] - FocusNOW`;
+      const minute = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+      const second = (timeLeft % 60).toString().padStart(2, "0");
+      const label = mode === "focus" ? "Focus" : mode === "shortBreak" ? "Short Break" : "Long Break";
+      document.title = `[${minute}:${second}] - ${label} | FocusNOW`;
     } else {
       document.title = "FocusNOW";
     }
-  }, [timeLeft, isActive]);
+  }, [timeLeft, isActive, mode]);
 
-  // --- ACTIONS ---
-  const updateDuration = (newDur: CustomTimeDuration) => {
-    setDuration(newDur);
-    if (!isActive) setTimeLeft(newDur[mode] * 60);
+  // HELPER FUNCTIONS
+  const playAlarm = () => {
+    const audio = new Audio("/sound/alarm.mp3");
+    audio.volume = 0.5;
+    audio.play().catch((err) => console.log("Audio play blocked:", err));
   };
 
-  const addTask = (title: string) => {
-    setTask([{ id: crypto.randomUUID(), title, isCompleted: false, dateCreated: Date.now() }, ...task]);
+  const updateDuration = (newDuration: CustomTimeDuration) => {
+    setDuration(newDuration);
+    // Jika timer sedang tidak jalan, langsung update timeLeft-nya
+    if (!isActive) {
+        setTimeLeft(newDuration[mode] * 60);
+    }
   };
 
   const toggleTask = (id: string) => {
-    setTask(prev => prev.map(t => t.id === id ? { ...t, isCompleted: !t.isCompleted } : t));
+    setTask((prev) => prev.map((t) => (t.id === id ? { ...t, isCompleted: !t.isCompleted } : t)));
+  };
+
+  const addTask = (title: string) => {
+    const newTask: Task = { id: crypto.randomUUID(), title, isCompleted: false, dateCreated: Date.now() };
+    setTask([newTask, ...task]);
   };
 
   const deleteTask = (id: string) => {
-    setTask(prev => prev.filter(t => t.id !== id));
+    setTask(task.filter((t) => t.id !== id));
     if (activeTaskID === id) setActiveTaskID(null);
   };
 
   const reorderTask = (activeID: string, overID: string) => {
-    setTask(items => {
-      const oldIdx = items.findIndex(t => t.id === activeID);
-      const newIdx = items.findIndex(t => t.id === overID);
-      return arrayMove(items, oldIdx, newIdx);
+    setTask((items) => {
+      const oldIndex = items.findIndex((t) => t.id === activeID);
+      const newIndex = items.findIndex((t) => t.id === overID);
+      return arrayMove(items, oldIndex, newIndex);
     });
   };
 
-  const activeTask = task.find(t => t.id === activeTaskID);
-  const unfocusTask = () => setActiveTaskID(null);
+  const activeTask = task.find((t) => t.id === activeTaskID);
 
   return (
-    <PomodoroContext.Provider value={{
-      task, activeTaskID, setActiveTaskID, activeTask, addTask, toggleTask,
-      deleteTask, reorderTask, duration, updateDuration, mode, setMode,
-      timeLeft, setTimeLeft, isActive, setIsActive, progress, unfocusTask
-    }}>
+    <PomodoroContext.Provider
+      value={{
+        task, activeTaskID, setActiveTaskID, activeTask, addTask, toggleTask,
+        deleteTask, reorderTask, duration, updateDuration, mode, setMode,
+        timeLeft, setTimeLeft, isActive, setIsActive, progress
+      }}
+    >
       {isLoaded ? children : null}
     </PomodoroContext.Provider>
   );
