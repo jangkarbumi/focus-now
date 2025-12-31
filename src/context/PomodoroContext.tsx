@@ -107,22 +107,16 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
         if (isActive && timeLeft > 0) {
         interval = setInterval(() => {
-            setTimeLeft((prev) =>  {
-                if (prev <= 1) {
+            setTimeLeft((prev) => {
+                if (timeLeft <= 1 && isActive) {
                     playAlarm();
-                    setIsActive(false);
-                    return duration[mode] * 60
+                    setIsActive(false)
+                    setTimeLeft(duration[mode] * 60)
                 }
 
-                return prev -1
-            })
+                return prev - 1
+            });
         }, 1000);
-        }
-
-        if (timeLeft === 0 && isActive) {
-            playAlarm();
-            setIsActive(false);
-            setTimeLeft(duration[mode] * 60); 
         }
 
         return () => {
@@ -138,7 +132,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         })
     }
 
-    const unfocusTask = (id: string) => {
+    const unfocusTask = () => {
         setActiveTaskID(null);
     }
 
