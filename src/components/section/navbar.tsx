@@ -25,7 +25,7 @@ export default function NavBar() {
                 </Sheet>
 
                 <Popover>
-                    <PopoverTrigger asChild>
+                    <PopoverTrigger>
                         <Button>
                             <UserRound/>
                             <span>User</span>
