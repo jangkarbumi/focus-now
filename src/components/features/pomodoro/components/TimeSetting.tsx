@@ -12,7 +12,7 @@ export function TimeSetting() {
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button variant='outline' size='icon'>
                     <Settings2 className="h-4 w-4" />
                 </Button>

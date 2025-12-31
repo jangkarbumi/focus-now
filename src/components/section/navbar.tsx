@@ -12,7 +12,7 @@ export default function NavBar() {
 
             <div className="flex gap-5 pr-6">
                 <Sheet>
-                    <SheetTrigger>
+                    <SheetTrigger asChild>
                         <Button>View Task</Button>
                     </SheetTrigger>
                     <SheetContent>
@@ -25,7 +25,7 @@ export default function NavBar() {
                 </Sheet>
 
                 <Popover>
-                    <PopoverTrigger>
+                    <PopoverTrigger asChild>
                         <Button>
                             <UserRound/>
                             <span>jangkarbumi</span>

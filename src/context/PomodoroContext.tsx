@@ -89,6 +89,16 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
 
     const activeTask = task.find(t => t.id === activeTaskID);
 
+    const playAlarm = () => {
+        const audio = new Audio("/sounds/alarm.mp3");
+        audio.play();
+
+        // Getarkan HP selama 500ms (jika didukung perangkat)
+        if ("vibrate" in navigator) {
+            navigator.vibrate(500);
+        }
+    };
+
     //USE EFFECT TIMER
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -100,6 +110,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         }
 
         if (timeLeft === 0 && isActive) {
+        playAlarm()
         setIsActive(false);
         setTimeLeft(duration[mode] * 60); 
         }
@@ -117,7 +128,7 @@ export function PomodoroProvider({children}: {children: React.ReactNode}) {
         })
     }
 
-    const unfocusTask = (id: string) => {
+    const unfocusTask = () => {
         setActiveTaskID(null);
     }
 
