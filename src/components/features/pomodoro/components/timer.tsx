@@ -66,7 +66,7 @@ return (
         </div>
 
         <Card className="w-[400px] shadow-xl border-t-4 border-t-primary">
-          <CardHeader className="text-center flex flex-col items-center">
+          <CardHeader className="text-center">
             <div className="flex justify-center gap-2 mb-4">
               {(['focus', 'shortBreak', 'longBreak'] as timerMode[]).map(m => (
                 <Button
